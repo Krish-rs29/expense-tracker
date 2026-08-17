@@ -1,0 +1,24 @@
+{
+  "name": "expense-tracker",
+  "version": "1.0.0",
+  "description": "Production-ready Full-Stack Expense Tracker application with Node.js SQLite REST API and modern Responsive UI",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "keywords": [
+    "expense-tracker",
+    "finance",
+    "budget",
+    "nodejs",
+    "sqlite",
+    "javascript"
+  ],
+  "author": "",
+  "license": "MIT"
+}

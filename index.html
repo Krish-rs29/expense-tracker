@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Multi-User Finance Tracker</title>
+  <meta name="description" content="A clean, responsive, and secure multi-user personal finance management dashboard.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Top Navigation Header -->
+    <header class="app-header" role="banner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">₹</div>
+        <div>
+          <h1>FinanceTracker</h1>
+          <p class="subtitle">Smart multi-user expense & income management</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <!-- User Profile Pill & Logout (Shown when authenticated) -->
+        <div id="user-profile-pill" class="user-pill hidden">
+          <span class="user-avatar" id="user-avatar-char">U</span>
+          <span class="user-name" id="user-name-display">User</span>
+          <button id="logout-btn" class="btn btn-outline-sm btn-logout" title="Log Out" aria-label="Log Out">Logout</button>
+        </div>
+
+        <button id="theme-toggle" class="btn btn-icon" title="Toggle Light/Dark Theme" aria-label="Toggle Light or Dark Theme">
+          <span class="theme-icon" aria-hidden="true">🌙</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Global Error Banner -->
+    <div class="error-banner hidden" id="error-banner" role="alert"></div>
+
+    <!-- AUTHENTICATION VIEW (Shown when unauthenticated) -->
+    <section id="auth-view" class="auth-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2 id="auth-title">Welcome to FinanceTracker</h2>
+          <p class="auth-subtitle" id="auth-subtitle">Sign in to manage your private financial records</p>
+        </div>
+
+        <!-- Auth Tabs -->
+        <div class="auth-tabs" role="tablist">
+          <button id="tab-login" class="auth-tab active" role="tab" aria-selected="true">Sign In</button>
+          <button id="tab-register" class="auth-tab" role="tab" aria-selected="false">Create Account</button>
+        </div>
+
+        <!-- Auth Error Alert -->
+        <div id="auth-error" class="auth-error-alert hidden" role="alert"></div>
+
+        <!-- LOGIN FORM -->
+        <form id="login-form" class="auth-form">
+          <div class="form-group">
+            <label for="login-email">Email Address</label>
+            <input type="email" id="login-email" required placeholder="you@example.com" autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="login-password" required placeholder="••••••••" autocomplete="current-password">
+              <button type="button" class="btn-toggle-password" data-target="login-password" title="Show/Hide Password">👁️</button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="login-submit-btn">Sign In</button>
+        </form>
+
+        <!-- REGISTER FORM -->
+        <form id="register-form" class="auth-form hidden">
+          <div class="form-group">
+            <label for="reg-name">Full Name</label>
+            <input type="text" id="reg-name" required placeholder="e.g. Krish Sharma" autocomplete="name">
+          </div>
+          <div class="form-group">
+            <label for="reg-email">Email Address</label>
+            <input type="email" id="reg-email" required placeholder="you@example.com" autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Password (min 6 characters)</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="reg-password" minlength="6" required placeholder="••••••••" autocomplete="new-password">
+              <button type="button" class="btn-toggle-password" data-target="reg-password" title="Show/Hide Password">👁️</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="reg-confirm-password">Confirm Password</label>
+            <input type="password" id="reg-confirm-password" minlength="6" required placeholder="••••••••" autocomplete="new-password">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="reg-submit-btn">Create Account</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- MAIN APP VIEW (Shown when authenticated) -->
+    <main id="app-view" class="hidden">
+      <!-- Top Action Bar -->
+      <div class="app-action-bar">
+        <div class="welcome-text">
+          <h2 id="welcome-heading">Welcome back!</h2>
+          <p>Here is your personalized financial overview</p>
+        </div>
+        <button id="export-csv-btn" class="btn btn-secondary" aria-label="Export transactions to CSV">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+      </div>
+
+      <!-- Executive KPI Dashboard -->
+      <section class="kpi-grid" id="kpi-grid" aria-label="Executive KPI Dashboard" role="region">
+        <div class="kpi-card balance-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Net Balance</span>
+            <span class="kpi-badge">Total</span>
+          </div>
+          <div class="kpi-amount" id="net-balance" aria-live="polite">₹0.00</div>
+          <div class="kpi-subtext" id="balance-status">Updated live</div>
+        </div>
+
+        <div class="kpi-card income-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Total Income</span>
+            <span class="kpi-icon text-success" aria-hidden="true">↓</span>
+          </div>
+          <div class="kpi-amount text-success" id="total-income" aria-live="polite">₹0.00</div>
+          <div class="kpi-subtext" id="monthly-income-sub">This month: ₹0.00</div>
+        </div>
+
+        <div class="kpi-card expense-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Total Expenses</span>
+            <span class="kpi-icon text-danger" aria-hidden="true">↑</span>
+          </div>
+          <div class="kpi-amount text-danger" id="total-expense" aria-live="polite">₹0.00</div>
+          
+          <div class="budget-progress-container" id="budget-progress-container">
+            <div class="budget-progress-header">
+              <span class="budget-label" id="budget-label">Budget Goal (₹50k)</span>
+              <span class="budget-percent" id="budget-percent">0%</span>
+            </div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" id="budget-progress-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kpi-card savings-card">
+          <div class="kpi-header">
+            <span class="kpi-title">Monthly Savings</span>
+            <span class="kpi-badge badge-primary" id="savings-rate-badge">0% Rate</span>
+          </div>
+          <div class="kpi-amount" id="monthly-savings" aria-live="polite">₹0.00</div>
+          <div class="kpi-subtext" id="monthly-expense-sub">Net savings this month</div>
+        </div>
+      </section>
+
+      <!-- Analytics & Charts Grid -->
+      <section class="analytics-grid" aria-label="Analytics & Data Visualizations" role="region">
+        <div class="card chart-card">
+          <div class="card-header">
+            <h2>Category Breakdown (This Month)</h2>
+          </div>
+          <div class="chart-container" id="category-chart-container">
+            <canvas id="category-chart" height="200" aria-label="Category Spending Donut Chart" role="img"></canvas>
+          </div>
+          <ul class="category-legend" id="category-legend" aria-label="Category Legend">
+          </ul>
+        </div>
+
+        <div class="card chart-card">
+          <div class="card-header">
+            <h2>Financial Trends (Past 6 Months)</h2>
+          </div>
+          <div class="chart-container" id="trend-chart-container">
+            <canvas id="trend-chart" height="200" aria-label="Income vs Expenses 6 Month Bar Chart" role="img"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Content: Form + Transactions List -->
+      <div class="main-grid">
+        <!-- Add / Edit Transaction Form -->
+        <section class="card form-card" aria-label="Transaction Form" role="region">
+          <h2 id="form-heading">Add New Transaction</h2>
+          <form id="expense-form">
+            <input type="hidden" id="edit-id" value="">
+            
+            <div class="type-selector" role="radiogroup" aria-label="Transaction Type Selector">
+              <label class="type-option">
+                <input type="radio" name="type" value="expense" checked aria-label="Expense type">
+                <span class="type-btn btn-type-expense">Expense</span>
+              </label>
+              <label class="type-option">
+                <input type="radio" name="type" value="income" aria-label="Income type">
+                <span class="type-btn btn-type-income">Income</span>
+              </label>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="amount">Amount (₹)</label>
+                <input type="number" id="amount" name="amount" step="0.01" min="0.01" required placeholder="0.00" aria-required="true">
+              </div>
+              <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category" name="category" required aria-required="true">
+                  <option value="">Select category</option>
+                  <option value="Food">Food</option>
+                  <option value="Transport">Transport</option>
+                  <option value="Shopping">Shopping</option>
+                  <option value="Bills">Bills</option>
+                  <option value="Entertainment">Entertainment</option>
+                  <option value="Salary">Salary</option>
+                  <option value="Freelance">Freelance</option>
+                  <option value="Investment">Investment</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text" id="description" name="description" placeholder="e.g. Grocery shopping, Salary">
+              </div>
+              <div class="form-group">
+                <label for="date">Date</label>
+                <input type="date" id="date" name="date" required aria-required="true">
+              </div>
+            </div>
+
+            <div class="form-buttons">
+              <button type="submit" class="btn btn-primary" id="submit-btn">Add Transaction</button>
+              <button type="button" class="btn btn-secondary hidden" id="cancel-edit-btn">Cancel Edit</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Filter Controls & Transactions List -->
+        <section class="card list-card" aria-label="Recent Transactions List" role="region">
+          <div class="list-header">
+            <h2>Recent Transactions</h2>
+            <span class="count-badge" id="transaction-count" aria-live="polite">0 items</span>
+          </div>
+
+          <div class="filter-toolbar" role="search" aria-label="Transaction Filters Toolbar">
+            <div class="filter-group search-group">
+              <input type="text" id="search-input" placeholder="Search transactions..." aria-label="Search description or category">
+            </div>
+            <div class="filter-group">
+              <select id="filter-type" aria-label="Filter by Transaction Type">
+                <option value="all">All Types</option>
+                <option value="expense">Expenses Only</option>
+                <option value="income">Income Only</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <select id="filter-category" aria-label="Filter by Category">
+                <option value="All">All Categories</option>
+                <option value="Food">Food</option>
+                <option value="Transport">Transport</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Bills">Bills</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Salary">Salary</option>
+                <option value="Freelance">Freelance</option>
+                <option value="Investment">Investment</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="filter-group date-group">
+              <input type="date" id="start-date" title="Start Date" aria-label="Filter Start Date">
+            </div>
+            <div class="filter-group date-group">
+              <input type="date" id="end-date" title="End Date" aria-label="Filter End Date">
+            </div>
+            <button id="reset-filters-btn" class="btn btn-outline-sm" title="Reset Filters" aria-label="Reset All Filters">Reset</button>
+          </div>
+
+          <div class="loading-state" id="loading-state" aria-live="polite">
+            <div class="spinner" aria-hidden="true"></div>
+            <p>Loading transactions...</p>
+          </div>
+
+          <div class="empty-state hidden" id="empty-state" aria-live="polite">
+            <div class="empty-icon" aria-hidden="true">💸</div>
+            <p class="empty-title">No transactions found</p>
+            <p class="empty-desc">Add a new transaction or try adjusting your search filters.</p>
+          </div>
+
+          <div class="table-wrapper hidden" id="table-wrapper">
+            <table class="expense-table" aria-label="Transactions Data Table">
+              <thead>
+                <tr>
+                  <th scope="col">Date</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Description</th>
+                  <th scope="col" class="text-right">Amount</th>
+                  <th scope="col" class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="expense-list">
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container" class="toast-container" aria-live="assertive" role="alert"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
