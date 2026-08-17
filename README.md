@@ -139,5 +139,34 @@ Once started, open your browser and navigate to:
 
 ---
 
+## ☁️ Production Deployment (Vercel & GitHub)
+
+This application is ready for serverless deployment on **Vercel** with GitHub integration.
+
+### Deployment Architecture
+- **Serverless API**: Handled via `api/index.js` which routes `/api/*` requests to `routes.js`.
+- **Database on Vercel**: `db.js` automatically uses `/tmp/expenses.db` when deployed in Vercel's serverless environment.
+- **Static Assets**: Handled natively by Vercel CDN.
+
+### Step-by-Step GitHub & Vercel Deployment
+
+1. **Push to GitHub**:
+   ```bash
+   # Add remote repository (replace with your GitHub URL)
+   git remote add origin https://github.com/Krish-rs29/expense-tracker.git
+   
+   # Push main branch
+   git push -u origin main
+   ```
+
+2. **Deploy to Vercel**:
+   - Go to [Vercel Dashboard](https://vercel.com/new).
+   - Import the `expense-tracker` repository from GitHub.
+   - Framework Preset: **Other** / **Node.js**.
+   - Node.js Version: **22.x** (or >= 20.x).
+   - Click **Deploy**.
+
+---
+
 ## 📄 License
 This project is licensed under the MIT License.
