@@ -13,12 +13,27 @@ module.exports = (req, res) => {
     pathname = '/api' + (pathname.startsWith('/') ? '' : '/') + pathname;
   }
 
-  // If Vercel pre-parsed the body into an object
-  if (req.body && typeof req.body === 'object') {
-    return handleApiRoute(req, res, pathname, parsedUrl.query, req.body);
+  const processRequest = (parsedBody) => {
+    handleApiRoute(req, res, pathname, parsedUrl.query, parsedBody);
+  };
+
+  // If Vercel pre-parsed the body into an object or string
+  if (req.body !== undefined && req.body !== null) {
+    let body = req.body;
+    if (typeof body === 'string' && body.trim()) {
+      try {
+        body = JSON.parse(body);
+      } catch (e) {}
+    }
+    return processRequest(typeof body === 'object' ? body : null);
   }
 
-  // Read stream if body is passed as raw string or stream
+  // If stream is already ended or GET/OPTIONS method
+  if (req.readableEnded || req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
+    return processRequest(null);
+  }
+
+  // Read request stream for POST/PUT/DELETE if body is unparsed stream
   let bodyData = '';
   req.on('data', chunk => {
     bodyData += chunk.toString();
@@ -26,12 +41,7 @@ module.exports = (req, res) => {
 
   req.on('end', () => {
     let parsedBody = null;
-    if (typeof req.body === 'string' && req.body.trim()) {
-      try {
-        parsedBody = JSON.parse(req.body);
-      } catch (e) {}
-    }
-    if (!parsedBody && bodyData.trim()) {
+    if (bodyData.trim()) {
       try {
         parsedBody = JSON.parse(bodyData);
       } catch (e) {
@@ -40,6 +50,6 @@ module.exports = (req, res) => {
         return;
       }
     }
-    handleApiRoute(req, res, pathname, parsedUrl.query, parsedBody);
+    processRequest(parsedBody);
   });
 };

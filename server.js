@@ -61,6 +61,13 @@ const server = http.createServer((req, res) => {
 
   fs.stat(filePath, (err, stats) => {
     if (err || !stats.isFile()) {
+      // SPA Fallback: serve index.html for non-asset routes
+      const indexPath = path.join(__dirname, 'index.html');
+      if (!path.extname(pathname) && fs.existsSync(indexPath)) {
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        fs.createReadStream(indexPath).pipe(res);
+        return;
+      }
       res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end('<h1>404 Not Found</h1><p>The requested file does not exist.</p>');
       return;
