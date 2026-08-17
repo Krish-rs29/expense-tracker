@@ -2,11 +2,12 @@
   "name": "expense-tracker",
   "version": "1.0.0",
   "description": "Production-ready Full-Stack Expense Tracker application with Node.js SQLite REST API and modern Responsive UI",
-  "main": "server.js",
+  "main": "api/index.js",
   "type": "commonjs",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "build": "echo 'Static build ready'"
   },
   "engines": {
     "node": ">=22.0.0"
